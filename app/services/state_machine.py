@@ -5,13 +5,14 @@ class ApplicationStateMachine:
     or (False, 'reason') on failure.
     """
     TRANSITIONS = {
-        "applied": ["screening", "rejected"],
-        "screening": ["interview", "rejected"],
-        "interview": ["offer", "rejected"],
-        "offer": ["hired", "rejected"],
-        "hired": [],
-        "rejected": []
-    }
+    "applied": ["screening", "rejected"],
+    "screening": ["shortlisted", "rejected"],
+    "shortlisted": ["selected", "rejected"],
+    "selected": ["hired", "rejected"],
+    "hired": [],
+    "rejected": []
+ }
+
 
     def __init__(self, current_state: str):
         if current_state not in self.TRANSITIONS:
