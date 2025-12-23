@@ -1,112 +1,3 @@
-ATS Backend
-
-A simple Applicant Tracking System (ATS) Backend built with Flask, SQLAlchemy, Celery, and Redis. This backend supports user authentication, job management, and job applications with state transitions.
-
-Features
-Authentication
-Method	Endpoint	Description
-POST	/auth/register	Register a new user
-POST	/auth/login	Login an existing user
-Job Management
-Method	Endpoint	Description
-POST	/jobs/create	Create a new job
-GET	/jobs/list	List all jobs
-GET	/jobs/<id>	View job details
-PUT	/jobs/<id>	Update job
-DELETE	/jobs/<id>	Delete job
-Applications
-Method	Endpoint	Description
-POST	/applications/create	Apply for a job
-POST	/applications/change-status	Change application state (shortlisted → selected)
-Installation
-
-Clone the repository:
-
-git clone <your-repo-url>
-cd ats-backend
-
-
-Create and activate a virtual environment:
-
-python -m venv venv
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # Linux/Mac
-
-
-Install dependencies:
-
-pip install -r requirements.txt
-
-Database
-
-SQLite database is used (ats.db).
-
-Models are defined in app/models.py.
-
-Run the app to automatically create the database tables.
-
-Running the Application
-
-Start the Flask app:
-
-python run.py
-
-
-Access the app at:
-
-http://127.0.0.1:5000
-
-Celery (Background Tasks)
-
-Celery is used for asynchronous tasks such as sending emails.
-
-Ensure Redis is running:
-
-docker run -p 6379:6379 --name ats-redis redis:7
-
-
-Start the Celery worker:
-
-venv\Scripts\activate
-celery -A app.services.background_tasks.celery worker --loglevel=info -P solo
-
-Project Structure
-ats-backend/
-├── app/
-│   ├── routes/
-│   │   ├── auth_routes.py
-│   │   ├── job_routes.py
-│   │   ├── application_routes.py
-│   │   └── ping_routes.py
-│   ├── services/
-│   │   ├── background_tasks.py
-│   │   ├── email_service.py
-│   │   └── state_machine.py
-│   ├── config.py
-│   ├── models.py
-│   └── __init__.py
-├── venv/
-├── run.py
-├── celery_worker.py
-├── Dockerfile
-├── requirements.txt
-├── ats.db
-├── README.md
-
-API Testing
-
-You can test endpoints using curl or Postman. Example:
-
-curl -X POST http://127.0.0.1:5000/auth/register \
--H "Content-Type: application/json" \
--d '{"email":"padma@example.com","role":"candidate"}'
-
-Notes
-
-Windows users should run Celery with the -P solo option due to multiprocessing issues.
-
-Redis is required for Celery tasks.
-
 # ATS Backend (Applicant Tracking System)
 
 This project is a backend implementation of a simple Applicant Tracking System (ATS) built using Flask and SQLAlchemy.  
@@ -134,48 +25,29 @@ The project is intentionally minimal and focused on backend architecture rather 
   - Apply for jobs
 
 RBAC logic is implemented in:
-
-
 app/services/authz.py
-
-
 ---
-
 ### Job Management
 - Create a job (recruiter only)
 - List all jobs
 - View job details
 - Update a job (recruiter only)
 - Delete a job (recruiter only)
-
 ---
-
 ### Job Applications
 - Candidates can apply for jobs
 - Each application has a status
 - Status transitions are validated using a centralized state machine
-
 ---
-
 ### Application State Machine
 - All valid transitions are defined in one place
 - Invalid transitions are rejected
-
 Supported states:
-
-
 applied → screening → interview → offer → hired
 Any state → rejected
-
-
 Implemented in:
-
-
 app/services/state_machine.py
-
-
 ---
-
 ### Application State Audit Logging (Transactional)
 - Every application state change is recorded in an audit table
 - Each audit record stores:
@@ -183,30 +55,17 @@ app/services/state_machine.py
   - New state
   - Timestamp
 - State update and audit log insertion are wrapped inside a single database transaction to ensure atomicity
-
 Audit model:
-
-
 ApplicationHistory
-
-
 ---
-
 ### Background Email Notifications
 - Email notifications are simulated using Celery
 - Redis is used as the message broker
 - Background processing prevents blocking API requests
-
 Celery task:
-
-
 send_email_task
-
-
 ---
-
 ## Tech Stack
-
 - Python
 - Flask
 - Flask-SQLAlchemy
@@ -214,13 +73,9 @@ send_email_task
 - Celery
 - Redis
 - Docker (used for Redis)
-
 ---
 
 ## Project Structure
-
-
-
 ats-backend/
 ├── app/
 │ ├── routes/
@@ -242,27 +97,19 @@ ats-backend/
 ├── Dockerfile
 ├── ats.db
 └── README.md
-
-
 ---
-
 ## Setup Instructions
-
 ### 1. Clone Repository
 ```bash
 git clone <your-github-repo-url>
 cd ats-backend
 
 2. Create and Activate Virtual Environment
-
 Windows
-
 python -m venv venv
 venv\Scripts\activate
 
-
 Linux / macOS
-
 python -m venv venv
 source venv/bin/activate
 
@@ -272,47 +119,26 @@ pip install -r requirements.txt
 4. Run Flask Application
 python run.py
 
-
 Application URL:
-
 http://127.0.0.1:5000
 
 Database
-
 SQLite database (ats.db)
-
 Tables are created automatically
-
 Models are defined in:
-
 app/models.py
-
 Running Redis (Required for Celery)
 docker run -p 6379:6379 --name ats-redis redis:7
-
-
 If Redis container already exists:
-
 docker start ats-redis
-
 Running Celery Worker (Windows)
-
 Activate virtual environment:
-
 venv\Scripts\activate
-
-
 Start Celery worker:
-
 celery -A app.services.background_tasks.celery worker --loglevel=info -P solo
-
-
 Note:
-
 -P solo is required on Windows
-
 Celery is used only for simulating background email notifications
-
 API Examples
 Create Job (Recruiter Only)
 curl -X POST http://127.0.0.1:5000/jobs/ \
@@ -335,29 +161,18 @@ View Application History
 curl http://127.0.0.1:5000/applications/1/history
 
 Limitations
-
 Authentication is simulated using headers and is not production-ready
-
 Email sending is mocked
-
 Dockerfile runs only Flask (Redis and Celery are started separately)
-
 Input validation is minimal
 
 Summary
-
 This project demonstrates:
-
 Clean Flask backend architecture
-
 Role-Based Access Control (RBAC)
-
 Centralized state machine logic
-
 Transactional audit logging
-
 Asynchronous background processing using Celery and Redis
-
 The focus is on backend correctness and design principles rather than full production deployment.
 
 Note: The application is partially containerized. Flask runs via Dockerfile,
